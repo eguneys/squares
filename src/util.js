@@ -16,6 +16,10 @@ export const key2pos = k => [k.charCodeAt(0) - 97, k.charCodeAt(1) - 49];
 export const black = 'black',
       white = 'white';
 
+export const allColors = [black, white];
+
+export const allRoles = ['king', 'queen', 'bishop', 'pawn', 'rook', 'knight'];
+
 export function asWhite(color) {
   return color === white;
 }

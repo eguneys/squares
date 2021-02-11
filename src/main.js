@@ -7,5 +7,5 @@ export function app(element, options) {
 
   let space = Game.fromFen(fen);
 
-  console.log(space.map(_ => _.key));
+  console.log(space.filter(_ => _.be === 'is').map(_ => _.key));
 }

@@ -12,54 +12,71 @@ Game.fromFen = fen => {
   let meta = util.readFen(fen);
 
   let board = new Pos();
-  let flow = new Flow();
+  let flow = new Flow(board.all);
 
-  // let res = board.pos('a2whiteking').queena();
+  flow.source(from => {
+    if (from.be === 'is') {
 
-  // console.log(res.map(_ => _ && _.key));
+      let be = meta.pieces[from.locationKey];
 
-  // return [];
+      if (be) {
+        let { color, role } = be;
 
-  for (let key in meta.pieces) {
-    key = key + meta.pieces[key].color + meta.pieces[key].role;
-    flow.source(board.pos(key));
-  }
+        return from.color === color &&
+          from.role === role;
+      } else {
+        return false;
+      }
 
-  flow.direction((from, to) => from.color === to.color);
+    } else {
 
-  flow.direction((from, to) => from.role === to.role);
+      for (let key in meta.pieces) {
+        let be = meta.pieces[key];
 
-  flow.direction((from, to) => {
-    let res;
-    switch(from.role) {
-    case 'queen':
-      res = from.queena();
-      break;
-    case 'king':
-      res = from.kinga();
-      break;
-    case 'rook':
-      res = from.rooka();
-      break;
-    case 'bishop':
-      res = from.bishopa();
-      break;
-    case 'knight':
-      res = from.knighta();
-      break;
-    case 'pawn':
-      res = from.uppawna();
-      break;
+        if (be) {
+          let { color, role } = be;
+          if (from.color === color && from.role === role) {
+            return false;
+          }
+        }
+      }
+      return true;
     }
-    return res.includes(to);
   });
 
-  // flow.direction(meta.pieces[key].color);
 
-  //flow.direction(meta.color);
+  // flow.direction((from, to) => from.color === to.color);
+  // flow.direction((from, to) => from.role === to.role);
+  // flow.direction((from, to) => {
+  //   let res;
+  //   switch(from.role) {
+  //   case 'queen':
+  //     res = from.queena();
+  //     break;
+  //   case 'king':
+  //     res = from.kinga();
+  //     break;
+  //   case 'rook':
+  //     res = from.rooka();
+  //     break;
+  //   case 'bishop':
+  //     res = from.bishopa();
+  //     break;
+  //   case 'knight':
+  //     res = from.knighta();
+  //     break;
+  //   case 'pawn':
+  //     res = from.uppawna();
+  //     break;
+  //   }
+  //   return res.includes(to);
+  // });
 
+  // flow.direction((from, to, turn) =>
+  //   (from.color === meta.color) === (turn % 2 === 0)
+  // );
 
   flow.flow();
 
-  return flow.space(1);
+  return flow.space(0);
 };

@@ -93,6 +93,11 @@ export default function Board() {
     8: Rank['8'],
   };
 
+  const beIndexes = [
+    'is',
+    'not'
+  ];
+
   const colorIndexes = [
     'white',
     'black'
@@ -104,25 +109,31 @@ export default function Board() {
     'knight',
     'bishop',
     'rook',
-    'pawn'
+    'pawn',
+    'empty'
   ];
 
   function PosKlass(index) {
     
     this.index = index;
 
-    let posRoleIndex = Math.floor(index / 2),
-        colorIndex = index % 2,
+    let bePosRoleIndex = Math.floor(index / 2),
+        beIndex = index % 2,
+        posRoleIndex = Math.floor(bePosRoleIndex / 2),
+        colorIndex = bePosRoleIndex % 2,
         posIndex = Math.floor(posRoleIndex / 6),
         roleIndex = posRoleIndex % 6;
 
     this.color = colorIndexes[colorIndex];
     this.role = roleIndexes[roleIndex];
+    this.be = beIndexes[beIndex];
 
     this.file = new FileKlass(Math.floor(posIndex / 8));
     this.rank = new RankKlass(posIndex % 8);
-    this.key = this.file.char + this.rank.char +
-      this.color + this.role;
+
+    this.locationKey = this.file.char + this.rank.char;
+    this.key = this.locationKey +
+      this.color + this.role + this.be;
 
     this.hore = (stop, dir) => {
       let p = dir(this);
@@ -201,7 +212,7 @@ export default function Board() {
       if (!f || !r) {
         return null;
       }
-      return Pos.atfr(f, r, colorIndex, roleIndex);
+      return Pos.atfr(f, r, colorIndex, roleIndex, beIndex);
     };
 
     this.left = () => atfr(left(), this.rank);
@@ -247,37 +258,14 @@ export default function Board() {
                     this.downLeft2(),
                     this.downRight2()];
 
-
-    this.makeSpace = (n) => {
-      return {
-        base: this,
-        n
-      };
-    };
-
-    let spaces = [
-      [],
-      [],
-      [],
-      []
-    ];
-
-    this.c = (space) => {
-      spaces[space.n].push(space.base);
-    };
-
-    this.space = (n) => spaces[n];
-
-    this.spaces = spaces;
-
     this.toString = () => 
     this.file.toString() + this.rank.toString();
     
   }
 
   const Pos = {
-    atfr(file, rank, color, role) {
-      return Pos.all[color + (role + (rank.index + file.index * 8) * 6) * 2];
+    atfr(file, rank, color, role, be) {
+      return Pos.all[be + (color + (role + (rank.index + file.index * 8) * 6) * 2) * 2];
     },
     at: (x, y) => {
       let file, rank;
@@ -299,7 +287,7 @@ export default function Board() {
   };
 
   const allIndexes = [];
-  for (let i = 0; i < 64 * 2 * 6; i++) {
+  for (let i = 0; i < 64 * 2 * 6 * 2; i++) {
     allIndexes.push(i);
   }
 
@@ -314,27 +302,6 @@ export default function Board() {
   Pos.A1 = new PosKlass(0);
   Pos.B1 = new PosKlass(1);
 
-
-  Pos.all.forEach(from => {
-    
-    let c0 = from.makeSpace(0),
-        c1 = from.makeSpace(1),
-        c2 = from.makeSpace(2),
-        c3 = from.makeSpace(3);
-
-    from.c(c0);
-
-    Pos.all.forEach(to1 => {
-      to1.c(c1);
-    });
-    Pos.all.forEach(to2 => {
-      to2.c(c2);
-    });
-    Pos.all.forEach(to3 => {
-      to3.c(c3);
-    });
-
-  });
 
   this.all = Pos.all;
 

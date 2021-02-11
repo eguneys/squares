@@ -1,24 +1,17 @@
-export default function Flow() {
+export default function Flow(space) {
 
-  let directions = [];
+  let sources = [],
+      directions = [];
 
   let spaces = [
-    [],
-    [],
-    [],
-    []
+    space,
+    space,
+    space,
+    space
   ];
 
   function source(source) {
-
-    spaces[0] = spaces[0]
-      .concat(source.spaces[0]);
-
-    spaces[1] = source.spaces[1];
-    
-    spaces[2] = source.spaces[2];
-
-    spaces[3] = source.spaces[3];
+    sources.push(source);
   }
 
   function direction(direction) {
@@ -26,10 +19,15 @@ export default function Flow() {
   }
 
   function flow() {
+
+    spaces[0] = spaces[0].filter(from =>
+      sources.every(source => source(from))
+    );
+
     spaces[1] = spaces[1].filter(to =>
       spaces[0].find(from =>
         directions.every(direction =>
-          direction(from, to)
+          direction(from, to, 0)
         )
       )
     );
