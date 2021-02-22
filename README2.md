@@ -1,3 +1,11 @@
+# Rules
+
+Pawn moves straight captures diagonally in a direction.
+Rook captures straight.
+
+
+
+
 
 change
 
@@ -132,8 +140,6 @@ Knight
     piece
     rook
     up down left right
-
-
 
     piece coord coord | coord
     position piece piece | piece piece
