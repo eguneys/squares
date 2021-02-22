@@ -13,7 +13,6 @@ Game.fromFen = fen => {
   let board = new Pos();
   let be = new Be(board);
 
-  let meta = util.readFen(fen);
+  return be.all;
 
-  return Selection.select(be.all, meta);
 };
