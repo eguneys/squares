@@ -56,15 +56,20 @@ let routesByRole = {
   'n': knight
 };
 
-// let res2 = routeCombinations2([
-//   [
-//     new Piece('b', new Coord(0, 1)),
-//   ],
-//   [
-//     new Piece('b', new Coord(1, 2)),
-//   ]]);
 
-// console.log(res2);
+let aPosition = [
+  [
+    new Piece('b', new Coord(0, 1)),
+    new Piece('q', new Coord(3, 1)),
+  ],
+  [
+    new Piece('b', new Coord(1, 2)),
+  ]];
+
+let res2 = routeCombinations2(aPosition);
+
+// select an active piece, move it, consequences
+// position -> [position] -> [[position]]
 
 function routeCombinations2(position) {
 
@@ -100,8 +105,89 @@ function routeCombinations2(position) {
   return res;  
 }
 
+function captureCombinations1(attacking, attacked) {
 
-function positionCombinations(
+  let [activeAttacking, passiveAttacking] = attacking;
+  let [activeAttacked, passiveAttacked] = attacked;
+
+  return passiveAttacking.find(captured => 
+    !activeAttacked.some(resisted => 
+      resisted.same(captured)));
+}
+
+function classifyMoves(position) {
+  return routeCombinations2(position).map(position2 => [
+    position,
+    position2,
+    captureCombinations1(position, position2)
+  ]);  
+};
+
+console.log(routeCombinations3(aPosition));
+
+function routeCombinations3(position) {
+  let [actives, passives] = position;
+
+  let res = [];
+
+  for (let i = 0; i < actives.length; i++) {
+    let movedPiece = actives[i];
+    let rest = [...actives.slice(0, i), ...actives.slice(i+1)];
+
+    let { origin, role } = movedPiece;
+
+    routesByRole[role].forEach(_ => {
+      let all = _.map(origin.route);
+      let [destination, ...path] = all;    
+
+      if (all.every(_ => _.valid())) {
+        
+        let stayStill = origin.same(destination);
+        let activeBlocking = rest.filter(piece => 
+          all.some(piece.origin.same));
+        let passiveBlocking = passives.filter(passive => 
+          path.some(passive.origin.same));
+
+        let capturedPiece,
+            restPassive,
+            captureByMove = false;
+
+        for (let j = 0; j < passives.length; j++) {
+
+          capturedPiece = passives[j];
+          restPassive = [...passives.slice(0, j), ...passives.slice(j+1)];
+
+          captureByMove = capturedPiece.origin.same(destination);
+
+          if (captureByMove) {
+            break;
+          } else {
+            capturedPiece = undefined;
+            restPassive = undefined;
+          }
+        }
+        
+        let movedRelocated = movedPiece.withOrigin(destination);
+
+
+        res.push({
+          actives,
+          passives,
+          stayStill,
+          activeBlocking,
+          passiveBlocking,
+          captureByMove,
+          capturedPiece,
+          restPassive,
+          movedPiece,
+          movedRelocated
+        });
+      }
+
+    });
+  }
+  return res;
+}
 
 
 function Piece(role, origin) {
@@ -111,6 +197,8 @@ function Piece(role, origin) {
   this.key = this.role + this.origin;
 
   this.withOrigin = (origin) => new Piece(role, origin);
+
+  this.same = (piece) => piece.role === role && piece.origin.same(origin);
 
   this.toString = () => {
     return this.role + this.origin;
